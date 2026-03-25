@@ -1,0 +1,692 @@
+:root {
+    --primary: #6366f1;
+    --primary-hover: #4f46e5;
+    --bg-dark: #0f172a;
+    --card-bg: rgba(30, 41, 59, 0.7);
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --accent: #10b981;
+    --danger: #ef4444;
+    --glass-border: rgba(255, 255, 255, 0.1);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+body {
+    background: var(--bg-dark);
+    color: var(--text-main);
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* Background Gradients */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background:
+        radial-gradient(circle at 20% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 40%),
+        radial-gradient(circle at 80% 80%, rgba(16, 185, 129, 0.1) 0%, transparent 40%);
+    z-index: -1;
+}
+
+.container {
+    width: 100%;
+    max-width: 1920px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+header {
+    margin-bottom: 3rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo-section h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    background: linear-gradient(to right, #fff, #94a3b8);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.logo-section p {
+    color: var(--text-muted);
+    font-size: 0.875rem;
+}
+
+.status-badge {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--accent);
+    padding: 0.5rem 1rem;
+    border-radius: 99px;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+    box-shadow: 0 0 10px var(--accent);
+}
+
+/* Main Grid Layout */
+.main-grid {
+    display: grid;
+    grid-template-columns: 350px 1fr;
+    gap: 2rem;
+}
+
+.spinner-mini {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    border-top-color: var(--accent);
+    animation: spin 1s ease-in-out infinite;
+    vertical-align: middle;
+    margin-right: 4px;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Glass Card Style */
+.glass-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 1.5rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.card-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+/* Upload Section */
+.upload-area {
+    border: 2px dashed rgba(148, 163, 184, 0.2);
+    border-radius: 12px;
+    padding: 2rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    margin-bottom: 1.5rem;
+}
+
+.upload-area:hover {
+    border-color: var(--primary);
+    background: rgba(99, 102, 241, 0.05);
+}
+
+.upload-icon {
+    font-size: 2rem;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+}
+
+.upload-text {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+.file-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.file-item {
+    background: rgba(255, 255, 255, 0.03);
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.875rem;
+}
+
+/* Analysis Result Area */
+.analysis-placeholder {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: var(--text-muted);
+    text-align: center;
+    padding: 4rem;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-primary:hover {
+    background: var(--primary-hover);
+    transform: translateY(-1px);
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Tabs Navigation */
+.tabs {
+    display: flex;
+    gap: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 0.5rem;
+    border-radius: 12px;
+    border: 1px solid var(--glass-border);
+}
+
+.tab-btn {
+    background: transparent;
+    color: var(--text-muted);
+    border: none;
+    padding: 0.5rem 1.25rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.tab-btn.active {
+    background: var(--primary);
+    color: white;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+/* Dashboard Grid */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.dashboard-grid canvas {
+    max-height: 300px;
+}
+
+.analysis-report {
+    color: #f1f5f9;
+    line-height: 1.8;
+    background: transparent !important;
+}
+
+.analysis-report h1,
+.analysis-report h2 {
+    color: #818cf8;
+    margin-bottom: 1.5rem;
+    background: transparent !important;
+}
+
+.analysis-report h3 {
+    color: #60a5fa;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    background: transparent !important;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.analysis-report strong {
+    color: #fbbf24;
+    font-weight: 700;
+}
+
+/* Glassmorphism for boxes inside report */
+.analysis-report div[style*="background"],
+.analysis-report .strategy-card,
+.analysis-report .highlight-box {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin: 1rem 0;
+    color: #f1f5f9 !important;
+}
+
+/* Table Polish for Strategy Report */
+.analysis-report table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+    background: transparent !important;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.analysis-report th {
+    background: rgba(99, 102, 241, 0.1) !important;
+    color: #818cf8 !important;
+    padding: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    font-weight: 600;
+}
+
+.analysis-report td {
+    padding: 0.875rem;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    color: #cbd5e1 !important;
+}
+
+.analysis-report .report-header {
+    background: transparent !important;
+    color: #ffffff !important;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(255, 255, 255, 0.1);
+    border-left-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Dashboard Enhancements */
+.counter-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.counter-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 1.25rem;
+    text-align: center;
+}
+
+.counter-label {
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.counter-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.dashboard-layout {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+}
+
+.three-column-row {
+    grid-column: span 2;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+}
+
+.full-width-card {
+    grid-column: span 2;
+}
+
+/* Row 2 Strategy (2:8 Ratio) */
+.strategy-row {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.strategy-row .glass-card:first-child {
+    flex: 2;
+}
+
+.strategy-row .glass-card:last-child {
+    flex: 8;
+}
+
+.strategy-row .glass-card {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Row 5 Grid (3 Columns) */
+.chart-grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+/* Row 6 Radar Grid (4 Columns) */
+.radar-grid-4 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+/* Table Column Polish */
+#detail-table th:nth-child(5),
+#detail-table td:nth-child(5) {
+    min-width: 120px;
+    /* Ensure "목적" is single line */
+    white-space: nowrap;
+}
+
+.chart-title {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-main);
+}
+
+/* Chart Annotations */
+.chart-annotation {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin-bottom: 1.25rem;
+    /* Increased spacing before chart */
+    font-weight: 400;
+    opacity: 0.9;
+    line-height: 1.4;
+}
+
+/* Scrollable Chart Containers */
+.chart-scroll-container {
+    width: 100%;
+    max-height: 400px;
+    overflow-y: auto;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    padding: 0.5rem;
+    border: 1px solid var(--glass-border);
+}
+
+.chart-height-enforcer {
+    width: 100%;
+    /* Height will be set dynamically via JS if needed, or fixed here for long bars */
+    height: 800px;
+}
+
+/* Data Table Styles */
+.detail-table-container {
+    margin-top: 1.5rem;
+    background: rgba(15, 23, 42, 0.5);
+    border-radius: 12px;
+    border: 1px solid var(--glass-border);
+    overflow: hidden;
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8125rem;
+    text-align: left;
+}
+
+.data-table th {
+    background: rgba(255, 255, 255, 0.08);
+    padding: 1rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    position: sticky;
+    top: 0;
+    backdrop-filter: blur(8px);
+    z-index: 10;
+}
+
+.data-table td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    color: var(--text-main);
+}
+
+.data-table tr:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.btn-icon {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    border-radius: 6px;
+    color: var(--text-main);
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.btn-icon:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+canvas {
+    width: 100%;
+    /* Remove !important to allow dynamic JS scaling and aspect-ratio */
+}
+
+/* Specific chart sizing classes */
+.standard-chart {
+    height: 350px !important;
+    /* Force fixed height */
+}
+
+.radar-chart {
+    height: 250px !important;
+    /* Force fixed height */
+}
+
+.three-column-row canvas {
+    max-height: 250px;
+}
+
+/* Special sizing for donut to keep it circular */
+.donut-wrapper {
+    width: 100%;
+    height: 300px;
+    /* 명시적인 높이값 부여 */
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.donut-wrapper canvas {
+    max-width: 250px !important;
+    aspect-ratio: 1 / 1;
+    margin: 0 auto;
+    display: block;
+}
+
+/* For scrollable charts, we override the !important height if it's inside an enforcer */
+.chart-height-enforcer canvas {
+    height: 100% !important;
+}
+
+.mb-6 {
+    margin-bottom: 1.5rem;
+}
+
+.mb-4 {
+    margin-bottom: 1rem;
+}
+
+.text-sm {
+    font-size: 0.8125rem;
+}
+
+.h-full {
+    height: 100%;
+}
+
+.analysis-report h3 {
+    color: var(--primary);
+    margin: 1.5rem 0 1rem 0;
+    font-size: 1.25rem;
+    border-left: 4px solid var(--primary);
+    padding-left: 0.75rem;
+}
+
+.analysis-report ul {
+    margin-left: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.analysis-report li {
+    margin-bottom: 0.5rem;
+    line-height: 1.6;
+}
+
+/* Strategy Tab Extensions */
+.strategy-textarea:focus {
+    border-color: var(--primary);
+    background: rgba(99, 102, 241, 0.05) !important;
+}
+
+.option-item:hover {
+    color: var(--primary);
+}
+
+.strategy-checkbox:checked+span {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.upload-area-mini:hover {
+    border-color: var(--primary) !important;
+    background: rgba(99, 102, 241, 0.05);
+}
+
+.strategy-sidebar {
+    position: sticky;
+    top: 2rem;
+}
+
+/* Admin Visibility Control */
+.admin-only {
+    display: none !important;
+}
+
+body.admin-mode .admin-only {
+    display: block !important;
+}
+
+/* Ensure admin mode triggers block display for elements like flex containers if needed */
+body.admin-mode div.admin-only {
+    display: block !important;
+}
+
+body.admin-mode div.admin-only[style*="display: flex"] {
+    display: flex !important;
+}
+
+.info-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    background: rgba(148, 163, 184, 0.2);
+    color: #94a3b8;
+    border-radius: 50%;
+    font-size: 10px;
+    cursor: help;
+    margin-left: 6px;
+    transition: all 0.2s;
+    vertical-align: middle;
+}
+
+.info-icon:hover {
+    background: #fbbf24;
+    color: #0f172a;
+}
+
+/* Executive Strategic Analysis Row */
+.executive-strategy-row {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 2rem !important;
+    width: 100% !important;
+    margin-bottom: 3rem !important;
+    margin-top: 2rem;
+}
+
+#dashboard-tab,
+#strategy-tab {
+    width: 100% !important;
+    max-width: 1920px;
+}
+
+.standard-chart {
+    width: 100% !important;
+    height: 350px !important;
+}

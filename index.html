@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patent Intel - 특허 관리 및 분석 시스템</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+    <!-- PDF.js library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+    <!-- Chart.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <div class="container animate-fade-in">
+        <header>
+            <div class="logo-section">
+                <h1 id="system-logo" style="cursor: pointer; user-select: none;">COWAY 연구소</h1>
+                <p>Patent Analysis System <span id="admin-indicator"
+                        style="display: none; color: var(--accent); font-size: 0.7rem; margin-left: 0.5rem;">[ADMIN
+                        MODE]</span></p>
+            </div>
+            <nav class="tabs">
+                <button class="tab-btn active" data-tab="dashboard">특허 현황 대시보드</button>
+                <button class="tab-btn" data-tab="analysis">특허 비교 분석</button>
+                <button class="tab-btn" data-tab="strategy" id="tab-btn-strategy">✨ 특허 보호 전략</button>
+            </nav>
+            <div class="status-badge">
+                <div class="status-dot"></div>
+                Gemini 1.5 Pro Active
+            </div>
+        </header>
+
+        <section class="main-grid" style="grid-template-columns: 1fr;">
+            <!-- Sidebar: Controls & Uploads -->
+            <aside class="sidebar" style="display: none;">
+                <div class="glass-card mb-3">
+                    <h2 class="card-title">
+                        <span>🛡️</span> 경쟁사 특허 업로드
+                    </h2>
+                    <div class="upload-area" id="drop-zone-competitor">
+                        <div class="upload-icon">📄</div>
+                        <p class="upload-text">경쟁사 특허 PDF를 업로드하세요</p>
+                        <button class="btn-primary" style="margin-top: 1rem; width: auto; font-size: 0.8rem;"
+                            onclick="document.getElementById('file-input-competitor').click()">파일 선택</button>
+                        <input type="file" id="file-input-competitor" style="display: none;" accept=".pdf" multiple>
+                    </div>
+                    <div id="loading-competitor"
+                        style="display: none; padding: 0.5rem; text-align: center; color: var(--accent); font-size: 0.75rem;">
+                        <span class="spinner-mini"></span> 파일 처리 중...
+                    </div>
+                </div>
+
+                <div class="glass-card mb-3">
+                    <h2 class="card-title">
+                        <span>📂</span> 우리 핵심 특허 라이브러리
+                    </h2>
+                    <div style="margin-bottom: 0.75rem;">
+                        <a href="https://drive.google.com/drive/folders/1sAYA8aK-GsF-F-cN2-3zY25pj4ZsjKgu"
+                            target="_blank" class="btn-primary"
+                            style="background: rgba(99, 102, 241, 0.2); border: 1px solid var(--primary); color: var(--text-main); text-decoration: none; margin-bottom: 0.5rem; justify-content: flex-start; padding: 0.5rem 0.75rem; font-size: 0.75rem;">
+                            <span>🌐</span> 구글 드라이브 폴더 열기 (참고용)
+                        </a>
+                    </div>
+
+                    <div class="upload-area" id="drop-zone-ours">
+                        <div class="upload-icon">📁</div>
+                        <p class="upload-text">비교할 우리 특허들을 업로드하세요</p>
+                        <div style="display: flex; gap: 0.5rem; justify-content: center; margin-top: 1rem;">
+                            <button class="btn-primary" style="width: auto; font-size: 0.82rem;"
+                                onclick="document.getElementById('file-input-ours-folder').click()">🏢 폴더 전체 선택</button>
+                            <button class="btn-primary"
+                                style="width: auto; font-size: 0.82rem; background: var(--text-muted);"
+                                onclick="document.getElementById('file-input-ours-files').click()">📄 개별 파일들 선택</button>
+                        </div>
+                        <input type="file" id="file-input-ours-folder" style="display: none;" accept=".pdf"
+                            webkitdirectory directory multiple>
+                        <input type="file" id="file-input-ours-files" style="display: none;" accept=".pdf" multiple>
+                    </div>
+                    <div id="loading-ours"
+                        style="display: none; padding: 0.5rem; text-align: center; color: var(--accent); font-size: 0.75rem;">
+                        <span class="spinner-mini"></span> 폴더/파일을 읽는 중입니다...
+                    </div>
+                    <div class="file-list" id="our-files-list"></div>
+                </div>
+
+                <div class="glass-card">
+                    <button class="btn-primary" id="analyze-btn">
+                        <span>✨</span> 정밀 분석 시작
+                    </button>
+                </div>
+            </aside>
+
+            <!-- Main Content: Analysis Results -->
+            <main class="analysis-window" id="analysis-tab" style="display: none;">
+                <div class="glass-card h-full">
+                    <div id="results-container" class="analysis-placeholder">
+                        <div class="upload-icon">🔍</div>
+                        <h3>분석 결과가 여기에 표시됩니다</h3>
+                        <p>경쟁사 특허를 업로드하고 분석 시작 버튼을 눌러주세요</p>
+                    </div>
+                </div>
+            </main>
+        </section>
+
+        <!-- Dashboard Content -->
+        <main class="dashboard-window" id="dashboard-tab"
+            style="display: block; grid-column: 1 / -1; padding-bottom: 5rem;">
+            <!-- 1. Data Connection -->
+            <div class="glass-card mb-6" style="padding: 1rem; background: rgba(255,255,255,0.03);">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h2 style="margin: 0; font-size: 1.1rem;">📊 데이터 연동 현황</h2>
+                    <div style="display: flex; gap: 1rem;" class="admin-only">
+                        <div class="upload-slot-mini">
+                            <span id="status-barrier" style="font-size: 0.75rem; color: var(--text-muted);">특허 장벽 리스트:
+                            </span>
+                            <button class="btn-primary" style="width: auto; font-size: 0.7rem; padding: 0.3rem 0.6rem;"
+                                onclick="document.getElementById('csv-upload-barrier').click()">파일 선택</button>
+                            <input type="file" id="csv-upload-barrier" style="display: none;" accept=".csv">
+                        </div>
+                        <div class="upload-slot-mini">
+                            <span id="status-trend" style="font-size: 0.75rem; color: var(--text-muted);">월별 출원 건수:
+                            </span>
+                            <button class="btn-primary" style="width: auto; font-size: 0.7rem; padding: 0.3rem 0.6rem;"
+                                onclick="document.getElementById('csv-upload-trend').click()">파일 선택</button>
+                            <input type="file" id="csv-upload-trend" style="display: none;" accept=".csv">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Gemini AI Insight -->
+            <div class="glass-card mb-6 animate-fade-in" id="ai-insight-section"
+                style="display: none; border-left: 5px solid var(--accent); background: rgba(99, 102, 241, 0.05);">
+                <div style="display: flex; gap: 1rem; align-items: flex-start;">
+                    <div style="font-size: 2rem;">✨</div>
+                    <div style="flex: 1;">
+                        <h3 style="margin: 0 0 0.5rem 0; font-size: 1rem; color: var(--accent);">Gemini Intelligence
+                            Report</h3>
+                        <div id="ai-insight-content"
+                            style="font-size: 0.875rem; line-height: 1.6; color: var(--text-main);">
+                            데이터를 분석 중입니다...
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Counter Board -->
+            <div class="counter-grid"
+                style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin-bottom: 2rem;">
+                <div class="counter-card" id="count-total">
+                    <div class="counter-label">총 특허 수</div>
+                    <div class="counter-value">-</div>
+                </div>
+                <div class="counter-card" id="count-filed" style="border-bottom: 3px solid var(--accent);">
+                    <div class="counter-label">출원 완료 (100%)</div>
+                    <div class="counter-value">-</div>
+                </div>
+                <div class="counter-card" id="count-progress" style="border-bottom: 3px solid var(--primary);">
+                    <div class="counter-label">진행 중 (50~75%)</div>
+                    <div class="counter-value">-</div>
+                </div>
+                <div class="counter-card" id="count-idea" style="border-bottom: 3px solid var(--text-muted);">
+                    <div class="counter-label">아이디어 (< 50%)</div>
+                            <div class="counter-value">-</div>
+                    </div>
+                </div>
+
+                <!-- Row 1: Core Charts -->
+                <div class="three-column-row"
+                    style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 2rem;">
+                    <div class="glass-card chart-card">
+                        <h3 class="chart-title">🛡️ 제품군별 진행 현황</h3>
+                        <div class="chart-annotation">제품군별 '출원/진행/아이디어' 단계 비중</div>
+                        <canvas id="productStatusChart" class="standard-chart"></canvas>
+                    </div>
+                    <div class="glass-card chart-card">
+                        <h3 class="chart-title">📈 월별 출원 건수</h3>
+                        <div class="chart-annotation">제품 브랜드별 월간 특허 출원 추이</div>
+                        <canvas id="monthlyFilingChart" class="standard-chart"></canvas>
+                    </div>
+                    <div class="glass-card chart-card">
+                        <h3 class="chart-title">📊 진행률 분포</h3>
+                        <div class="chart-annotation">0~100% 진행률 구간별 특허 수 분포</div>
+                        <canvas id="progressDistributionChart" class="standard-chart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Row 2: Strategy Analysis (2:8 Ratio) -->
+                <div class="strategy-row" style="display: flex; gap: 1.5rem; margin-bottom: 2rem;">
+                    <div class="glass-card chart-card" style="flex: 2;">
+                        <h3 class="chart-title">🎯 특허 전략 비중</h3>
+                        <div class="chart-annotation">전체 특허의 전략적 목적 분포</div>
+                        <div class="donut-wrapper">
+                            <canvas id="purposeDonutChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="glass-card chart-card" style="flex: 8;">
+                        <h3 class="chart-title">🚀 PJT별 전략(적용.방어) 비율</h3>
+                        <div class="chart-annotation">주요 프로젝트별 전략적 포지셔닝</div>
+                        <div class="chart-scroll-container">
+                            <div class="chart-height-enforcer" id="pjtRatioScrollArea">
+                                <canvas id="pjtPurposeRatioChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Row 3: Detail Table (Full Width) -->
+                <div class="glass-card full-width-card mb-6">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h3 class="chart-title" id="detail-table-title" style="margin: 0;">📂 특허 상세 리스트</h3>
+                        <button class="btn-primary" style="width: auto; font-size: 0.7rem;"
+                            onclick="resetDetailTable()">🔄 초기화</button>
+                    </div>
+                    <div class="detail-table-container" style="overflow-x: auto;">
+                        <table class="data-table" id="detail-table">
+                            <thead>
+                                <tr>
+                                    <th>No.</th>
+                                    <th>구분</th>
+                                    <th>PJT명</th>
+                                    <th>관련 기술</th>
+                                    <th>목적</th>
+                                    <th>담당부서</th>
+                                    <th>담당자</th>
+                                    <th>출원일</th>
+                                    <th>진행률</th>
+                                </tr>
+                            </thead>
+                            <tbody id="detail-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Row 5: Resource & IP (3 Columns) -->
+                <div class="chart-grid-3"
+                    style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 2rem;">
+                    <div class="glass-card chart-card">
+                        <h3 class="chart-title">👤 담당자별 특허 보유량</h3>
+                        <div class="chart-annotation">연구원별 업무 부하 및 기여도</div>
+                        <canvas id="workloadChart" class="standard-chart"></canvas>
+                    </div>
+                    <div class="glass-card chart-card">
+                        <h3 class="chart-title">🤝 IP 협업 현황</h3>
+                        <div class="chart-annotation">IP 담당자별 프로젝트 지원 건수</div>
+                        <canvas id="ipCollabChart" class="standard-chart"></canvas>
+                    </div>
+                    <div class="glass-card chart-card">
+                        <h3 class="chart-title">📐 프로젝트별 특허 밀도</h3>
+                        <div class="chart-annotation">주요 PJT별 기술 집약도 분석</div>
+                        <canvas id="pjtDensityChart" class="standard-chart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Row 6: Categorical Tech Focus (4 Radars) -->
+                <div class="radar-grid-4"
+                    style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin-bottom: 2rem;">
+                    <div class="glass-card chart-card">
+                        <h3 class="chart-title" style="font-size: 0.8rem;">💧 Water 기술 집중도</h3>
+                        <canvas id="waterRadar" class="radar-chart"></canvas>
+                    </div>
+                    <div class="glass-card chart-card">
+                        <h3 class="chart-title" style="font-size: 0.8rem;">🍃 Air 기술 집중도</h3>
+                        <canvas id="airRadar" class="radar-chart"></canvas>
+                    </div>
+                    <div class="glass-card chart-card">
+                        <h3 class="chart-title" style="font-size: 0.8rem;">🏠 Living 기술 집중도</h3>
+                        <canvas id="livingRadar" class="radar-chart"></canvas>
+                    </div>
+                    <div class="glass-card chart-card">
+                        <h3 class="card-title" style="font-size: 0.8rem;">💆 BEREX 기술 집중도</h3>
+                        <canvas id="berexRadar" class="radar-chart"></canvas>
+                    </div>
+                </div>
+                <div class="executive-strategy-row mb-6"
+                    style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; width: 100%;">
+                    <div class="glass-card chart-card" style="width: 100%;">
+                        <h3 class="chart-title" style="font-size: 1.2rem; color: #ffffff;">
+                            🌐 기술 선점도 vs. 시장 성숙도 분석
+                            <span class="info-icon"
+                                title="산출 근거: '기술' 및 'PJT' 필드 내 원천키워드(최초, 원천, WOW, 독점) 비중 기반 선점도 산출">ⓘ</span>
+                        </h3>
+                        <div class="chart-annotation">제품별 원천 기술 확보 수준 및 시장 성숙도 매트릭스</div>
+                        <div style="height: 350px; width: 100%; position: relative;">
+                            <canvas id="techMaturityMatrix" class="standard-chart"
+                                style="width: 100% !important;"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="glass-card chart-card" style="width: 100%;">
+                        <h3 class="chart-title" style="font-size: 1.2rem; color: #ffffff;">
+                            🛡️ 경쟁사 우회 시나리오별 장벽 강도
+                            <span class="info-icon" title="산출 근거: '방어' 목적 특허 중 등록 완료(진행률 100%) 건에 대한 가중치 합산">ⓘ</span>
+                        </h3>
+                        <div class="chart-annotation">핵심 기술군별 대응 장벽의 견고함 분석</div>
+                        <div style="height: 350px; width: 100%; position: relative;">
+                            <canvas id="evasionBarrierChart" class="standard-chart"
+                                style="width: 100% !important;"></canvas>
+                        </div>
+                    </div>
+                </div>
+        </main>
+
+        <!-- Strategy Selection Content -->
+        <main class="strategy-window" id="strategy-tab"
+            style="display: none; grid-column: 1 / -1; padding-bottom: 5rem;">
+            <div class="strategy-hero animate-fade-in" style="margin-bottom: 1.25rem;">
+                <h2
+                    style="font-size: 1.5rem; font-weight: 700; margin-bottom: 0.25rem; background: linear-gradient(to right, #fff, var(--primary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                    🛡️ 특허 보호 전략 어드바이저
+                </h2>
+                <p style="color: var(--text-muted); font-size: 0.85rem;">개발 중인 기술을 완벽하게 독점하기 위한 AI 기반 입체적 특허망 구축 전략을
+                    제안합니다.</p>
+            </div>
+
+            <div class="strategy-grid"
+                style="display: grid; grid-template-columns: 380px 1fr; gap: 2rem; align-items: start;">
+                <!-- Strategy Sidebar -->
+                <aside class="strategy-sidebar">
+                    <div class="glass-card mb-6">
+                        <h3 class="card-title" style="font-size: 1rem;"><span>📑</span> 기술 설명서 업로드</h3>
+                        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1rem;">보호하고 싶은 신규 기술의 상세
+                            설명, 아이디어 노트, 또는 설계 문서를 입력하거나 PDF를 업로드하세요.</p>
+
+                        <textarea id="tech-note-input"
+                            style="width: 100%; min-height: 120px; background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); border-radius: 12px; color: #fff; padding: 0.85rem; font-size: 0.85rem; resize: vertical; margin-bottom: 0.75rem; outline: none;"
+                            placeholder="기술의 핵심 메커니즘, 구성 요소, 효과를 자유롭게 입력하세요..."></textarea>
+
+                        <div style="margin-bottom: 0.75rem;">
+                            <a href="https://drive.google.com/drive/folders/1sAYA8aK-GsF-F-cN2-3zY25pj4ZsjKgu"
+                                target="_blank" class="btn-primary"
+                                style="background: rgba(99, 102, 241, 0.2); border: 1px solid var(--primary); color: var(--text-main); text-decoration: none; margin-bottom: 0.5rem; justify-content: flex-start; padding: 0.5rem 0.75rem; font-size: 0.75rem;">
+                                <span>🌐</span> 구글 드라이브 폴더 열기 (참고용)
+                            </a>
+                        </div>
+
+                        <div class="upload-area-mini" id="drop-zone-strategy"
+                            style="border: 2px dashed rgba(148, 163, 184, 0.2); border-radius: 12px; padding: 1.5rem; text-align: center; transition: all 0.3s ease;">
+                            <div style="font-size: 1.2rem; margin-bottom: 0.5rem;">📄</div>
+                            <p style="font-size: 0.75rem; color: var(--text-muted);">PDF 기술 문서 업로드</p>
+                            <div style="display: flex; gap: 0.5rem; justify-content: center; margin-top: 1rem;">
+                                <button class="btn-primary" style="width: auto; font-size: 0.71rem;"
+                                    onclick="document.getElementById('file-input-strategy-folder').click()">🏢 폴더 전체 선택</button>
+                                <button class="btn-primary"
+                                    style="width: auto; font-size: 0.71rem; background: var(--text-muted);"
+                                    onclick="document.getElementById('file-input-strategy-files').click()">📄 개별 파일들 선택</button>
+                            </div>
+                            <input type="file" id="file-input-strategy-folder" style="display: none;" accept=".pdf"
+                                webkitdirectory directory multiple>
+                            <input type="file" id="file-input-strategy-files" style="display: none;" accept=".pdf" multiple>
+                        </div>
+                        <div id="loading-strategy"
+                            style="display: none; padding: 0.5rem; text-align: center; color: var(--accent); font-size: 0.75rem;">
+                            <span class="spinner-mini"></span> 문서 처리 중...
+                        </div>
+                    </div>
+
+                    <div class="glass-card">
+                        <button class="btn-primary" id="generate-strategy-btn"
+                            style="margin-bottom: 1rem; background: linear-gradient(135deg, var(--primary), #818cf8);">
+                            <span>✨</span> AI 보호 전략 생성
+                        </button>
+
+                        <h3 class="card-title" style="font-size: 0.95rem; margin-bottom: 0.75rem;"><span>🚀</span> 전략 수립
+                            옵션</h3>
+                        <div class="strategy-options" style="display: flex; flex-direction: column; gap: 0.6rem;">
+                            <label class="option-item"
+                                style="display: flex; align-items: center; gap: 0.75rem; font-size: 0.8rem; cursor: pointer;">
+                                <input type="checkbox" class="strategy-checkbox" value="thicket" checked
+                                    style="accent-color: var(--primary);">
+                                <span>입체적 특허망(Thicket) 구축</span>
+                            </label>
+                            <label class="option-item"
+                                style="display: flex; align-items: center; gap: 0.75rem; font-size: 0.8rem; cursor: pointer;">
+                                <input type="checkbox" class="strategy-checkbox" value="avoidance" checked
+                                    style="accent-color: var(--primary);">
+                                <span>경쟁사 회피 경로 차단</span>
+                            </label>
+                            <label class="option-item"
+                                style="display: flex; align-items: center; gap: 0.75rem; font-size: 0.8rem; cursor: pointer;">
+                                <input type="checkbox" class="strategy-checkbox" value="claims" checked
+                                    style="accent-color: var(--primary);">
+                                <span>청구항 권리 범위 확장</span>
+                            </label>
+                        </div>
+                    </div>
+                </aside>
+
+                <!-- Strategy Results -->
+                <div class="strategy-main">
+                    <div class="glass-card" id="strategy-results-container"
+                        style="min-height: 600px; position: relative; padding: 2rem;">
+                        <div class="analysis-placeholder">
+                            <div class="upload-icon" style="opacity: 0.5;">🛡️</div>
+                            <h3>보호 전략 분석 결과</h3>
+                            <p>기술 설명서를 입력하고 전략 생성 버튼을 눌러주세요</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="debug-logs"
+        style="margin: 2rem; padding: 1rem; background: rgba(0,0,0,0.5); border-radius: 8px; font-family: monospace; font-size: 0.7rem; color: #aaa; max-height: 100px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.1);">
+        [System] Debug logs will appear here...
+    </div>
+    <div id="last-updated-container"
+        style="position: fixed; bottom: 10px; right: 20px; font-size: 0.65rem; color: var(--text-muted); opacity: 0.6; pointer-events: none; z-index: 1000;">
+        데이터 업데이트: <span id="last-updated-time">기록 없음</span>
+    </div>
+    <script src="analysis.js"></script>
+</body>
+
+</html>
